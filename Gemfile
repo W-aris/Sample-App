@@ -8,6 +8,7 @@ ruby "3.1.2"
 # Core framework
 # ----------------------------
 gem "rails", "~> 7.0.3"
+gem "bcrypt", "~> 3.1.7"
 
 # ----------------------------
 # Asset pipeline + Sass
@@ -17,6 +18,8 @@ gem "sprockets-rails", "~> 3.5"
 
 gem "sassc"
 gem "sassc-rails"
+gem "bootstrap-sass", "3.4.1"
+
 
 # ----------------------------
 # Database
