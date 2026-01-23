@@ -8,6 +8,7 @@ ruby "3.1.2"
 # Core framework
 # ----------------------------
 gem "rails", "~> 7.0.3"
+gem "active_storage_validations", "0.9.8"
 gem "bcrypt", "~> 3.1.7"
 
 # ----------------------------
