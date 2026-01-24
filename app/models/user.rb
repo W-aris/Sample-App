@@ -1,5 +1,18 @@
 class User < ApplicationRecord
-  has_many :microposts,dependent: :destroy
+  has_many :microposts, dependent: :destroy
+
+  has_many :active_relationships,
+           class_name:  "Relationship",
+           foreign_key: "follower_id",
+           dependent:   :destroy
+  has_many :passive_relationships, class_name:
+     "Relationship", foreign_key: "followed_id",
+  
+ dependent: :destroy
+  has_many :following,
+           through: :active_relationships,
+           source:  :followed
+  has_many :followers, through: :passive_relationships, source: :follower
 
   attr_accessor :remember_token, :activation_token, :reset_token
 
@@ -65,7 +78,7 @@ class User < ApplicationRecord
   # Activates an account.
   def activate
     update_columns(
-      activated: true,
+      activated:    true,
       activated_at: Time.zone.now
     )
   end
@@ -79,8 +92,8 @@ class User < ApplicationRecord
   def create_reset_digest
     self.reset_token = User.new_token
     update_columns(
-      reset_digest: User.digest(reset_token),
-      reset_sent_at: Time.zone.now
+      reset_digest:   User.digest(reset_token),
+      reset_sent_at:  Time.zone.now
     )
   end
 
@@ -93,9 +106,27 @@ class User < ApplicationRecord
   def password_reset_expired?
     reset_sent_at < 2.hours.ago
   end
+
+  # Returns a user's status feed.
   def feed
     Micropost.where("user_id = ?", id)
   end
+
+  # Follows a user.
+  def follow(other_user)
+    following << other_user unless self == other_user
+  end
+
+  # Unfollows a user.
+  def unfollow(other_user)
+    following.delete(other_user)
+  end
+
+  # Returns true if the current user is following the other user.
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
   private
 
   # Converts email to all lowercase.
@@ -109,4 +140,3 @@ class User < ApplicationRecord
     self.activation_digest = User.digest(activation_token)
   end
 end
- 

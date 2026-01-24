@@ -1,14 +1,14 @@
 class UsersController < ApplicationController
-  before_action :logged_in_user, only: %i[index edit update destroy]
+  before_action :logged_in_user, only: %i[index edit update destroy following followers]
   before_action :correct_user,   only: %i[edit update]
   before_action :admin_user,     only: :destroy
+  before_action :set_user,       only: %i[show edit update destroy following followers]
 
   def index
     @users = User.paginate(page: params[:page])
   end
 
   def show
-    @user = User.find(params[:id])
     @microposts = @user.microposts.paginate(page: params[:page])
   end
 
@@ -29,12 +29,9 @@ class UsersController < ApplicationController
   end
 
   def edit
-    @user = User.find(params[:id])
   end
 
   def update
-    @user = User.find(params[:id])
-
     if @user.update(user_params)
       flash[:success] = "Profile updated"
       redirect_to @user
@@ -44,9 +41,21 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
+    @user.destroy
     flash[:success] = "User deleted"
     redirect_to users_url, status: :see_other
+  end
+
+  def following
+    @title = "Following"
+    @users = @user.following.paginate(page: params[:page])
+    render "show_follow"
+  end
+
+  def followers
+    @title = "Followers"
+    @users = @user.followers.paginate(page: params[:page])
+    render "show_follow"
   end
 
   private
@@ -60,7 +69,9 @@ class UsersController < ApplicationController
     )
   end
 
-
+  def set_user
+    @user = User.find(params[:id])
+  end
 
   # Confirms an admin user.
   def admin_user
@@ -69,7 +80,6 @@ class UsersController < ApplicationController
 
   # Confirms the correct user.
   def correct_user
-    @user = User.find(params[:id])
     redirect_to root_url, status: :see_other unless current_user?(@user)
   end
 end
